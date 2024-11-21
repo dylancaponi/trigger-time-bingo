@@ -22,8 +22,20 @@ export const BingoBoard = () => {
     }
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      e.preventDefault();
+      if (currentEdit !== null) {
+        const nextIndex = (currentEdit + 1) % 25;
+        setCurrentEdit(nextIndex);
+      }
+    }
+  };
+
   const handleInputBlur = () => {
-    setCurrentEdit(null);
+    if (!document.activeElement?.classList.contains('bingo-input')) {
+      setCurrentEdit(null);
+    }
   };
 
   const shuffleBoard = () => {
@@ -143,7 +155,8 @@ export const BingoBoard = () => {
                   value={text}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
-                  className="w-full h-full text-center"
+                  onKeyDown={handleInputKeyDown}
+                  className="w-full h-full text-center bingo-input"
                 />
               ) : (
                 <span className="text-center text-sm break-words">
