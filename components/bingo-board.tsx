@@ -1,11 +1,40 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Shuffle, Save, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 export const BingoBoard = () => {
-  const [squares, setSquares] = useState(Array(25).fill(''));
+  const defaultSquares = [
+    "So... getting married soon?",
+    "Political argument at dinner",
+    "Unsolicited parenting advice",
+    "The bathtub story again",
+    "'You've lost/gained weight!'",
+    "Drama over who hosts next year",
+    "Passive aggressive compliment",
+    "Food critic strikes",
+    "'Back in my day...'",
+    "Phone at dinner",
+    "Awkward relationship question",
+    "Diet talk",
+    "FREE SPACE", // center square
+    "Someone's late (again)",
+    "Outdated career advice",
+    "Kids running wild",
+    "Someone falls asleep on couch",
+    "'When are you having kids?'",
+    "Old family drama resurfaces",
+    "Backhanded compliment",
+    "Someone takes too many photos",
+    "Surprise dietary restriction",
+    "'You should visit more often'",
+    "Weather small talk",
+    "Someone mentions the will",
+  ];
+
+  const [squares, setSquares] = useState(defaultSquares);
+
   const [currentEdit, setCurrentEdit] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
@@ -93,6 +122,13 @@ export const BingoBoard = () => {
     event.target.value = '';
   };
 
+  const getFontSize = (text: string) => {
+    console.log('Text content:', text); // Debug log
+    if (text.length > 100) return 'text-[10px]';
+    if (text.length > 50) return 'text-[12px]';
+    return 'text-[14px]';
+  };
+
   return (
     <Card className="w-full max-w-xl">
       <CardHeader className="space-y-4">
@@ -100,6 +136,9 @@ export const BingoBoard = () => {
           <CardTitle>Family Gathering Bingo</CardTitle>
           <p className="text-sm text-muted-foreground mt-1 italic">
             (aka Trigger Time Bingo™)
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Click any square to customize it with your own family's quirks!
           </p>
         </div>
         <div className="space-y-4 text-sm text-muted-foreground">
@@ -130,7 +169,7 @@ export const BingoBoard = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <input
             type="file"
             ref={fileInputRef}
@@ -178,22 +217,34 @@ export const BingoBoard = () => {
                 aspect-square border-2 border-gray-300 
                 flex items-center justify-center p-1
                 cursor-pointer hover:border-blue-500
+                min-h-[80px] min-w-[80px]
                 ${index === 12 ? 'bg-gray-100' : ''}
-                ${currentEdit === index ? 'border-blue-500' : ''}
+                ${currentEdit === index ? 'border-blue-500 bg-blue-50 shadow-sm' : ''}
               `}
             >
               {currentEdit === index ? (
-                <Input
+                <textarea
                   autoFocus
                   value={text}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(e as any)}
                   onBlur={handleInputBlur}
                   onKeyDown={handleInputKeyDown}
-                  className="w-full h-full text-center bingo-input"
+                  className={`w-full h-full text-center resize-none border-none focus:outline-none bg-transparent ${getFontSize(text)}`}
+                  style={{
+                    lineHeight: '1.2',
+                    padding: '4px',
+                  }}
                 />
               ) : (
-                <span className="text-center text-sm break-words">
-                  {text}
+                <span className="text-center break-words text-gray-500 hover:text-gray-800 transition-colors group h-full flex flex-col relative">
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className={`leading-tight ${getFontSize(text)} max-w-full px-1`}>
+                      {text}
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 w-full">
+                    Click to edit
+                  </div>
                 </span>
               )}
             </div>
