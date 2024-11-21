@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Shuffle, Save, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/button';
+import { Input } from '@/components/input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/card';
 
 export const BingoBoard = () => {
   const [squares, setSquares] = useState(Array(25).fill(''));
