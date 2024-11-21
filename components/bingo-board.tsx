@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Shuffle, Save, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 export const BingoBoard = () => {
@@ -138,7 +137,7 @@ export const BingoBoard = () => {
             (aka Trigger Time Bingo™)
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Click any square to customize it with your own family's quirks!
+            Click any square to customize it with your own family&apos;s quirks!
           </p>
         </div>
         <div className="space-y-4 text-sm text-muted-foreground">
@@ -226,7 +225,7 @@ export const BingoBoard = () => {
                 <textarea
                   autoFocus
                   value={text}
-                  onChange={(e) => handleInputChange(e as any)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>)}
                   onBlur={handleInputBlur}
                   onKeyDown={handleInputKeyDown}
                   className={`w-full h-full text-center resize-none border-none focus:outline-none bg-transparent ${getFontSize(text)}`}
