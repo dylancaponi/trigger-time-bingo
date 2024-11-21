@@ -50,7 +50,7 @@ export const BingoBoard = () => {
     }
   };
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.key === 'Tab' || e.key === 'Enter') {
       e.preventDefault();
       if (currentEdit !== null) {
