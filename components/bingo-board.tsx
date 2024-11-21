@@ -96,7 +96,40 @@ export const BingoBoard = () => {
   return (
     <Card className="w-full max-w-xl">
       <CardHeader className="space-y-4">
-        <CardTitle>Custom Bingo Board</CardTitle>
+        <div>
+          <CardTitle>Family Gathering Bingo</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1 italic">
+            (aka Trigger Time Bingo™)
+          </p>
+        </div>
+        <div className="space-y-4 text-sm text-muted-foreground">
+          <p>
+            Get together with your peers (fellow sufferers? kindred spirits?) and fill in the squares with 
+            family gathering moments you're almost certain will happen - from predictable comments about your 
+            life choices to that one relative's infamous story they tell every year. Shuffle, print a unique 
+            board for each player, and may the most observant cousin win!
+          </p>
+          <div className="space-y-2">
+            <p>
+              <strong>How to play:</strong> Game begins when the first guest arrives. First player to complete 
+              a horizontal, vertical, or diagonal line wins...
+            </p>
+            <div className="border-b-2 border-dashed border-gray-300 py-1 px-2">
+              {/* Empty line for prize */}
+            </div>
+            <div className="text-xs italic">
+              Prize suggestions:
+              <ul className="list-disc ml-5 mt-1 space-y-1">
+                <li>Choose the seating arrangement at the next gathering</li>
+                <li>Exemption from dish duty</li>
+                <li>First dibs on leftovers</li>
+                <li>One "family emergency" escape card for next gathering</li>
+                <li>Pick the restaurant for the next cousin meetup</li>
+                <li>Custody of grandma's secret recipe</li>
+              </ul>
+            </div>
+          </div>
+        </div>
         <div className="flex gap-2">
           <input
             type="file"
