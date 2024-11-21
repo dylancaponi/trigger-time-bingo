@@ -42,7 +42,7 @@ export const BingoBoard = () => {
     setCurrentEdit(index);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newSquares = [...squares];
     if (currentEdit !== null) {
       newSquares[currentEdit] = e.target.value;
@@ -225,7 +225,7 @@ export const BingoBoard = () => {
                 <textarea
                   autoFocus
                   value={text}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>)}
+                  onChange={handleInputChange}
                   onBlur={handleInputBlur}
                   onKeyDown={handleInputKeyDown}
                   className={`w-full h-full text-center resize-none border-none focus:outline-none bg-transparent ${getFontSize(text)}`}
