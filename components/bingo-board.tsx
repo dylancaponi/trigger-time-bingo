@@ -83,7 +83,7 @@ export const BingoBoard = () => {
 
   return (
     <Card className="w-full max-w-xl">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="space-y-4">
         <CardTitle>Custom Bingo Board</CardTitle>
         <div className="flex gap-2">
           <input
