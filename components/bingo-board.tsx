@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Shuffle, Save, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 export const BingoBoard = () => {
   const [squares, setSquares] = useState(Array(25).fill(''));
@@ -72,7 +72,7 @@ export const BingoBoard = () => {
               alert('Invalid board format. File must contain exactly 25 squares.');
             }
           }
-        } catch (error) {
+        } catch {
           alert('Error loading board: Please select a valid JSON file created by the Bingo Board Generator.');
         }
       };
