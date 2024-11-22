@@ -138,9 +138,11 @@ export const BingoBoard = () => {
 
     // Convert to appropriate text size class
     // Each line should be roughly 1.2x the font size
-    const mobileFontSize = Math.min(Math.floor(targetLineHeight / 1.2), 10); // Reduced from 14 to 10
+    const mobileFontSize = Math.min(Math.floor(targetLineHeight / 1.2), 8); // Reduced from 10 to 8
     
-    return `text-[${mobileFontSize}px] sm:text-[14px]`;
+    // Add a random query parameter to force style recalculation
+    const timestamp = Date.now();
+    return `text-[${mobileFontSize}px] sm:text-[14px] style-${timestamp}`;
   };
 
   return (
