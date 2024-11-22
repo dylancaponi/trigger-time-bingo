@@ -238,7 +238,15 @@ export const BingoBoard = () => {
               ) : (
                 <span className="text-center break-words text-gray-500 hover:text-gray-800 transition-colors group h-full flex flex-col relative">
                   <div className="flex-1 flex items-center justify-center">
-                    <div className={`leading-tight ${getFontSize(text)} max-w-full px-1`}>
+                    <div className={`
+                      leading-tight 
+                      ${getFontSize(text)} 
+                      max-w-full 
+                      px-1
+                      max-h-full
+                      overflow-hidden
+                      text-ellipsis
+                    `}>
                       {text}
                     </div>
                   </div>
