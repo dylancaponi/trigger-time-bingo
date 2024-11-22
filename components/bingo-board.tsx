@@ -122,10 +122,25 @@ export const BingoBoard = () => {
   };
 
   const getFontSize = (text: string) => {
-    console.log('Text content:', text); // Debug log
-    if (text.length > 100) return 'text-[10px]';
-    if (text.length > 50) return 'text-[12px]';
-    return 'text-[14px]';
+    // Calculate characters per line based on square size
+    // Mobile squares are 60px, desktop 80px
+    // Assuming ~6px per character on average
+    const mobileCharsPerLine = Math.floor(60 / 6);  // ~10 chars
+    const desktopCharsPerLine = Math.floor(80 / 6); // ~13 chars
+
+    // Calculate optimal size based on text length and available space
+    const textLength = text.length;
+    const lines = Math.ceil(textLength / mobileCharsPerLine);
+    
+    // Available height is ~50px (accounting for padding)
+    const maxHeight = 50;
+    const targetLineHeight = Math.floor(maxHeight / lines);
+
+    // Convert to appropriate text size class
+    // Each line should be roughly 1.2x the font size
+    const mobileFontSize = Math.min(Math.floor(targetLineHeight / 1.2), 14);
+    
+    return `text-[${mobileFontSize}px] sm:text-[14px]`;
   };
 
   return (
