@@ -129,7 +129,7 @@ export const BingoBoard = () => {
   };
 
   return (
-    <Card className="w-full max-w-xl">
+    <Card className="w-full max-w-xl mx-auto px-2 sm:px-4">
       <CardHeader className="space-y-4">
         <div>
           <CardTitle>Family Gathering Bingo</CardTitle>
@@ -216,7 +216,8 @@ export const BingoBoard = () => {
                 aspect-square border-2 border-gray-300 
                 flex items-center justify-center p-1
                 cursor-pointer hover:border-blue-500
-                min-h-[80px] min-w-[80px]
+                min-h-[60px] sm:min-h-[80px]
+                min-w-[60px] sm:min-w-[80px]
                 ${index === 12 ? 'bg-gray-100' : ''}
                 ${currentEdit === index ? 'border-blue-500 bg-blue-50 shadow-sm' : ''}
               `}
