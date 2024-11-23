@@ -122,15 +122,15 @@ export const BingoBoard = () => {
   };
 
   const getFontSize = (text: string) => {
-    const maxChars = 20;
+    const maxChars = 15;
     const baseFontSize = 14;
     const minFontSize = 8;
 
     const length = text.length;
-    const reduction = Math.floor((length - maxChars) / 5);
+    const reduction = Math.floor((length - maxChars) / 3);
     const fontSize = Math.max(baseFontSize - reduction, minFontSize);
 
-    return `text-[${fontSize}px] sm:text-[${fontSize + 2}px] leading-tight max-w-full`;
+    return `text-[${fontSize}px] leading-tight max-w-full`;
   };
 
   return (
@@ -237,6 +237,8 @@ export const BingoBoard = () => {
                   style={{
                     lineHeight: '1.2',
                     padding: '4px',
+                    overflow: 'hidden',
+                    height: 'auto',
                   }}
                 />
               ) : (
