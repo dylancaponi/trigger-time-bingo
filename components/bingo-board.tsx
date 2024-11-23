@@ -224,7 +224,7 @@ export const BingoBoard = () => {
   }, [currentEdit]);
 
   const TriggeredOverlay = () => (
-    <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center">
+    <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center z-[1]">
       <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
         TRIGGERED!
       </div>
@@ -365,7 +365,7 @@ export const BingoBoard = () => {
             </div>
           ))}
           <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 z-10 border-2 border-blue-500 bg-blue-50 shadow-lg flex items-center justify-center"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 z-[2] border-2 border-blue-500 bg-blue-50 shadow-lg flex items-center justify-center"
               data-edit-overlay
               style={{
                 position: 'absolute',
