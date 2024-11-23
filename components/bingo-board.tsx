@@ -122,26 +122,24 @@ export const BingoBoard = () => {
   };
 
   const getFontSize = (text: string) => {
-    // Calculate base size based on viewport
     const baseSize = {
       mobile: {
-        maxChars: 10,
-        fontSize: 10,
+        maxChars: 15,
+        fontSize: 12,
         minFontSize: 8
       },
       desktop: {
-        maxChars: 13,
-        fontSize: 14,
+        maxChars: 20,
+        fontSize: 16,
         minFontSize: 10
       }
     };
 
-    // Calculate size reduction based on text length
     const getReducedSize = (length: number, config: typeof baseSize.mobile) => {
       if (length <= config.maxChars) return config.fontSize;
       
-      // Reduce font size based on length, but never below minFontSize
-      const reduction = Math.floor((length - config.maxChars) / 5);
+      // More gradual reduction: decrease by 1px for every 8 additional characters
+      const reduction = Math.floor((length - config.maxChars) / 8);
       return Math.max(config.fontSize - reduction, config.minFontSize);
     };
 
@@ -230,7 +228,7 @@ export const BingoBoard = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-2 aspect-square w-full mx-auto">
           {squares.map((text, index) => (
             <div
               key={index}
@@ -239,11 +237,7 @@ export const BingoBoard = () => {
                 aspect-square border-2 border-gray-300 
                 flex items-center justify-center
                 cursor-pointer hover:border-blue-500
-                min-h-[60px] sm:min-h-[80px]
-                min-w-[60px] sm:min-w-[80px]
-                max-w-[60px] sm:max-w-[80px]
                 p-0.5 sm:p-1
-                overflow-hidden
                 ${index === 12 ? 'bg-gray-100' : ''}
                 ${currentEdit === index ? 'border-blue-500 bg-blue-50 shadow-sm' : ''}
               `}
@@ -262,21 +256,19 @@ export const BingoBoard = () => {
                   }}
                 />
               ) : (
-                <span className="text-center break-words text-gray-500 hover:text-gray-800 transition-colors group h-full w-full flex flex-col relative">
-                  <div className="flex-1 flex items-center justify-center w-full">
-                    <div className={`
-                      ${getFontSize(text)} 
-                      max-w-full 
-                      px-0.5
-                      max-h-full
-                      overflow-hidden
-                      text-ellipsis
-                      line-clamp-4
-                    `}>
-                      {text}
+                <span className="text-center h-full w-full relative group">
+                  <div className="absolute inset-0 flex flex-col justify-center items-center">
+                    <div className="flex-1 flex items-center justify-center">
+                      <div
+                        className={`w-full break-normal overflow-hidden text-gray-500 hover:text-gray-800 transition-colors ${getFontSize(
+                          text
+                        )}`}
+                      >
+                        {text}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-0.5 w-full">
+                  <div className="absolute bottom-0 w-full h-[16px] text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                     Click to edit
                   </div>
                 </span>
