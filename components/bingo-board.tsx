@@ -122,31 +122,15 @@ export const BingoBoard = () => {
   };
 
   const getFontSize = (text: string) => {
-    const baseSize = {
-      mobile: {
-        maxChars: 15,
-        fontSize: 12,
-        minFontSize: 8
-      },
-      desktop: {
-        maxChars: 20,
-        fontSize: 16,
-        minFontSize: 10
-      }
-    };
+    const maxChars = 20;
+    const baseFontSize = 14;
+    const minFontSize = 8;
 
-    const getReducedSize = (length: number, config: typeof baseSize.mobile) => {
-      if (length <= config.maxChars) return config.fontSize;
-      
-      // More gradual reduction: decrease by 1px for every 8 additional characters
-      const reduction = Math.floor((length - config.maxChars) / 8);
-      return Math.max(config.fontSize - reduction, config.minFontSize);
-    };
+    const length = text.length;
+    const reduction = Math.floor((length - maxChars) / 5);
+    const fontSize = Math.max(baseFontSize - reduction, minFontSize);
 
-    const mobileFontSize = getReducedSize(text.length, baseSize.mobile);
-    const desktopFontSize = getReducedSize(text.length, baseSize.desktop);
-
-    return `text-[${mobileFontSize}px] sm:text-[${desktopFontSize}px] leading-tight`;
+    return `text-[${fontSize}px] sm:text-[${fontSize + 2}px] leading-tight max-w-full`;
   };
 
   return (
