@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Shuffle, Save, Upload, Play, Ban } from 'lucide-react';
+import { Shuffle, Save, Upload, Play, Ban, Settings2 } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
@@ -42,6 +42,7 @@ export const BingoBoard = () => {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [triggeredSquares, setTriggeredSquares] = useState<Set<number>>(new Set());
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleSquareClick = (index: number) => {
     if (isPlaying) {
@@ -273,7 +274,7 @@ export const BingoBoard = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center relative">
           <input
             type="file"
             ref={fileInputRef}
@@ -282,27 +283,8 @@ export const BingoBoard = () => {
             className="hidden"
             aria-label="Load bingo board from JSON file"
           />
-          <a 
-            ref={downloadRef} 
-            className="hidden"
-          />
-          <Button 
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2"
-            title="Load a previously saved bingo board (JSON file)"
-            disabled={isPlaying}
-          >
-            <Upload className="w-4 h-4" />
-            Load
-          </Button>
-          <Button 
-            onClick={saveBoard}
-            className="flex items-center gap-2"
-            title="Save current bingo board to a JSON file"
-          >
-            <Save className="w-4 h-4" />
-            Save
-          </Button>
+          <a ref={downloadRef} className="hidden" />
+          
           <Button 
             onClick={shuffleBoard}
             className="flex items-center gap-2"
@@ -321,6 +303,44 @@ export const BingoBoard = () => {
             {isPlaying ? <Ban className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             {isPlaying ? 'Stop' : 'Play'}
           </Button>
+
+          <div className="relative ml-auto">
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="w-9 h-9"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              aria-label="Advanced options"
+            >
+              <Settings2 className="w-4 h-4" />
+            </Button>
+
+            {showAdvanced && (
+              <div className="absolute top-full right-0 mt-1 bg-white border rounded-md shadow-lg py-1 min-w-[150px] z-50">
+                <button 
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                    setShowAdvanced(false);
+                  }}
+                  disabled={isPlaying}
+                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  <Upload className="w-4 h-4" />
+                  Load Board
+                </button>
+                <button 
+                  onClick={() => {
+                    saveBoard();
+                    setShowAdvanced(false);
+                  }}
+                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Board
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
