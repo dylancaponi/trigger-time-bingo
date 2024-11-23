@@ -43,6 +43,17 @@ export const BingoBoard = () => {
   const handleSquareClick = (index: number) => {
     if (currentEdit !== null) return;
     setCurrentEdit(index);
+    
+    // Add a small delay to allow the keyboard to start appearing
+    setTimeout(() => {
+      const editOverlay = document.querySelector('[data-edit-overlay]');
+      if (editOverlay) {
+        editOverlay.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }, 100);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
