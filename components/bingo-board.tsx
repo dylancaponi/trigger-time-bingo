@@ -47,7 +47,11 @@ export const BingoBoard = () => {
     if (isPlaying) {
       setTriggeredSquares(prev => {
         const newSet = new Set(prev);
-        newSet.add(index);
+        if (newSet.has(index)) {
+          newSet.delete(index);  // Remove if already triggered
+        } else {
+          newSet.add(index);     // Add if not triggered
+        }
         return newSet;
       });
       return;
