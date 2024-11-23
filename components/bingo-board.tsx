@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Shuffle, Save, Upload } from 'lucide-react';
+import { Shuffle, Save, Upload, Play, Ban } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
@@ -40,7 +40,19 @@ export const BingoBoard = () => {
 
   const textRefs = useRef<Array<HTMLDivElement | null>>([]);
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [triggeredSquares, setTriggeredSquares] = useState<Set<number>>(new Set());
+
   const handleSquareClick = (index: number) => {
+    if (isPlaying) {
+      setTriggeredSquares(prev => {
+        const newSet = new Set(prev);
+        newSet.add(index);
+        return newSet;
+      });
+      return;
+    }
+    
     if (currentEdit !== null) return;
     setCurrentEdit(index);
     
@@ -207,6 +219,14 @@ export const BingoBoard = () => {
     };
   }, [currentEdit]);
 
+  const TriggeredOverlay = () => (
+    <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center">
+      <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
+        TRIGGERED!
+      </div>
+    </div>
+  );
+
   return (
     <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
@@ -264,6 +284,7 @@ export const BingoBoard = () => {
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center gap-2"
             title="Load a previously saved bingo board (JSON file)"
+            disabled={isPlaying}
           >
             <Upload className="w-4 h-4" />
             Load
@@ -279,9 +300,18 @@ export const BingoBoard = () => {
           <Button 
             onClick={shuffleBoard}
             className="flex items-center gap-2"
+            disabled={isPlaying}
           >
             <Shuffle className="w-4 h-4" />
             Shuffle
+          </Button>
+          <Button 
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="flex items-center gap-2"
+            variant={isPlaying ? "destructive" : "default"}
+          >
+            {isPlaying ? <Ban className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isPlaying ? 'Stop' : 'Play'}
           </Button>
         </div>
       </CardHeader>
@@ -297,8 +327,10 @@ export const BingoBoard = () => {
                 cursor-pointer hover:border-blue-500
                 p-0.5 sm:p-1
                 transition-all duration-300
+                relative
                 ${index === 12 ? 'bg-gray-100' : ''}
                 ${currentEdit === index ? 'opacity-0' : ''}
+                ${isPlaying && triggeredSquares.has(index) ? 'border-red-500' : ''}
               `}
             >
               <div className="w-full h-full relative group">
@@ -324,6 +356,7 @@ export const BingoBoard = () => {
                 <div className="absolute bottom-1 w-full text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity text-center">
                   Click to edit
                 </div>
+                {isPlaying && triggeredSquares.has(index) && <TriggeredOverlay />}
               </div>
             </div>
           ))}
