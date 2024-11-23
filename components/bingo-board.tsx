@@ -358,16 +358,15 @@ export const BingoBoard = () => {
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
                   onKeyDown={handleInputKeyDown}
-                  className={`
-                    ${getTextStyles()}
-                    text-[min(6vw, 24px)] leading-tight
-                  `}
+                  className={getTextStyles()}
                   style={{
                     wordBreak: 'keep-all',
                     overflowWrap: 'break-word',
                     whiteSpace: 'pre-wrap',
                     width: '100%',
                     height: '100%',
+                    fontSize: '24px',
+                    lineHeight: '1.2',
                   }}
                 />
               )}
