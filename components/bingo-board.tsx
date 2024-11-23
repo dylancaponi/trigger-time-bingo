@@ -129,7 +129,7 @@ export const BingoBoard = () => {
     event.target.value = '';
   };
 
-  const getTextStyles = (text: string) => {
+  const getTextStyles = () => {
     return `
       text-center resize-none border-none 
       focus:outline-none bg-transparent
@@ -291,7 +291,7 @@ export const BingoBoard = () => {
                   <div 
                     ref={(el) => (textRefs.current[index] = el)}
                     className={`
-                      ${getTextStyles(text)}
+                      ${getTextStyles()}
                       text-gray-500 hover:text-gray-800 transition-colors
                       leading-tight
                     `}
@@ -336,7 +336,7 @@ export const BingoBoard = () => {
                   onBlur={handleInputBlur}
                   onKeyDown={handleInputKeyDown}
                   className={`
-                    ${getTextStyles(squares[currentEdit])}
+                    ${getTextStyles()}
                     text-[min(6vw, 24px)] leading-tight
                   `}
                   style={{
