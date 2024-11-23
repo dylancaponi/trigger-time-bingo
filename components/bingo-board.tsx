@@ -43,15 +43,50 @@ export const BingoBoard = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [triggeredSquares, setTriggeredSquares] = useState<Set<number>>(new Set());
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [hasWon, setHasWon] = useState(false);
+  const [prizeLine, setPrizeLine] = useState('');
+
+  const prizes = [
+    "Congratulations! You've witnessed peak family dysfunction! 🎭",
+    "You won, but at what emotional cost? 🥲",
+    "Victory! Your therapy sessions weren't in vain! 🧠",
+    "Champion of chaos! Your coping mechanisms are unmatched! 🏆",
+    "Winner! Maybe next time stay home and order takeout? 🥡",
+    "Success! Time to schedule that therapy appointment! 📅",
+    "You survived! But did you really win? 🤔",
+    "First place in family drama bingo! Last place in peace of mind! 🎪",
+    "Victory achieved! Your emotional damage is now complete! 🎯",
+    "Winner winner... anxiety dinner! 🍽️"
+  ];
+
+  const checkForBingo = (triggered: Set<number>) => {
+    // Horizontal rows
+    for (let i = 0; i < 25; i += 5) {
+      if ([0,1,2,3,4].every(j => triggered.has(i + j))) return true;
+    }
+    // Vertical rows
+    for (let i = 0; i < 5; i++) {
+      if ([0,5,10,15,20].every(j => triggered.has(i + j))) return true;
+    }
+    // Diagonals
+    if ([0,6,12,18,24].every(i => triggered.has(i))) return true;
+    if ([4,8,12,16,20].every(i => triggered.has(i))) return true;
+    return false;
+  };
 
   const handleSquareClick = (index: number) => {
     if (isPlaying) {
       setTriggeredSquares(prev => {
         const newSet = new Set(prev);
         if (newSet.has(index)) {
-          newSet.delete(index);  // Remove if already triggered
+          newSet.delete(index);
         } else {
-          newSet.add(index);     // Add if not triggered
+          newSet.add(index);
+        }
+        // Check for bingo after updating
+        if (checkForBingo(newSet) && !hasWon) {
+          setHasWon(true);
+          setPrizeLine(prizes[Math.floor(Math.random() * prizes.length)]);
         }
         return newSet;
       });
@@ -104,16 +139,18 @@ export const BingoBoard = () => {
   };
 
   const shuffleBoard = () => {
-    // Check if there are any triggered squares
-    if (triggeredSquares.size > 0) {
+    if (triggeredSquares.size > 0 || hasWon) {
       const confirmShuffle = window.confirm(
         "Shuffling the board will reset your current game progress. Are you sure you want to continue?"
       );
       if (!confirmShuffle) return;
-      // Clear triggered squares if user confirms
-      setTriggeredSquares(new Set());
     }
-
+    
+    // Reset game state
+    setHasWon(false);
+    setPrizeLine('');
+    setTriggeredSquares(new Set());
+    
     const newSquares = [...squares];
     const centerValue = newSquares[12];
     const toShuffle = [...newSquares.slice(0, 12), ...newSquares.slice(13)];
@@ -234,6 +271,12 @@ export const BingoBoard = () => {
     };
   }, [currentEdit]);
 
+  const resetGame = () => {
+    setTriggeredSquares(new Set());
+    setHasWon(false);
+    setPrizeLine('');
+  };
+
   return (
     <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
@@ -343,7 +386,7 @@ export const BingoBoard = () => {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <div className="grid grid-cols-5 gap-2 aspect-square w-full mx-auto relative">
           {squares.map((text, index) => (
             <div
@@ -445,6 +488,23 @@ export const BingoBoard = () => {
               )}
             </div>
         </div>
+
+        {hasWon && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50 animate-fadeIn">
+            <div className="text-center animate-slideDown">
+              <h2 className="text-6xl font-bold text-yellow-400 mb-4 animate-pulse">
+                BINGO!
+              </h2>
+              <p className="text-white text-xl mb-6">{prizeLine}</p>
+              <Button 
+                onClick={resetGame}
+                variant="secondary"
+              >
+                Play Again
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
