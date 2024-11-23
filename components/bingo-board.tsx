@@ -366,13 +366,13 @@ export const BingoBoard = () => {
                     Click to edit
                   </div>
                 )}
-                {triggeredSquares.has(index) && isPlaying ? (
+                {isPlaying && triggeredSquares.has(index) && (
                   <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center">
                     <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
                       TRIGGERED!
                     </div>
                   </div>
-                ) : null}
+                )}
               </div>
             </div>
           ))}
