@@ -103,6 +103,16 @@ export const BingoBoard = () => {
   };
 
   const shuffleBoard = () => {
+    // Check if there are any triggered squares
+    if (triggeredSquares.size > 0) {
+      const confirmShuffle = window.confirm(
+        "Shuffling the board will reset your current game progress. Are you sure you want to continue?"
+      );
+      if (!confirmShuffle) return;
+      // Clear triggered squares if user confirms
+      setTriggeredSquares(new Set());
+    }
+
     const newSquares = [...squares];
     const centerValue = newSquares[12];
     const toShuffle = [...newSquares.slice(0, 12), ...newSquares.slice(13)];
@@ -356,7 +366,7 @@ export const BingoBoard = () => {
                     Click to edit
                   </div>
                 )}
-                {isPlaying && triggeredSquares.has(index) ? (
+                {triggeredSquares.has(index) && isPlaying ? (
                   <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center">
                     <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
                       TRIGGERED!
