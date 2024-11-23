@@ -223,14 +223,6 @@ export const BingoBoard = () => {
     };
   }, [currentEdit]);
 
-  const TriggeredOverlay = () => (
-    <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center z-[1]">
-      <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
-        TRIGGERED!
-      </div>
-    </div>
-  );
-
   return (
     <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
@@ -310,7 +302,9 @@ export const BingoBoard = () => {
             Shuffle
           </Button>
           <Button 
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={() => {
+              setIsPlaying(!isPlaying);
+            }}
             className="flex items-center gap-2"
             variant={isPlaying ? "destructive" : "default"}
           >
@@ -357,10 +351,18 @@ export const BingoBoard = () => {
                     {text}
                   </div>
                 </div>
-                <div className="absolute bottom-1 w-full text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                  Click to edit
-                </div>
-                {isPlaying && triggeredSquares.has(index) && <TriggeredOverlay />}
+                {!isPlaying && (
+                  <div className="absolute bottom-1 w-full text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                    Click to edit
+                  </div>
+                )}
+                {isPlaying && triggeredSquares.has(index) ? (
+                  <div className="absolute inset-0 bg-red-100/80 flex items-center justify-center">
+                    <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
+                      TRIGGERED!
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           ))}
