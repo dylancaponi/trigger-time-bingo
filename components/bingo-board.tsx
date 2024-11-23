@@ -60,18 +60,20 @@ export const BingoBoard = () => {
   ];
 
   const checkForBingo = (triggered: Set<number>) => {
-    // Horizontal rows
-    for (let i = 0; i < 25; i += 5) {
-      if ([0,1,2,3,4].every(j => triggered.has(i + j))) return true;
-    }
-    // Vertical rows
-    for (let i = 0; i < 5; i++) {
-      if ([0,5,10,15,20].every(j => triggered.has(i + j))) return true;
-    }
-    // Diagonals
-    if ([0,6,12,18,24].every(i => triggered.has(i))) return true;
-    if ([4,8,12,16,20].every(i => triggered.has(i))) return true;
-    return false;
+    // Pre-calculate possible winning combinations
+    const winningCombos = [
+      // Rows
+      [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
+      // Columns
+      [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24],
+      // Diagonals
+      [0,6,12,18,24], [4,8,12,16,20]
+    ];
+
+    // Check if any winning combination is fully contained in triggered squares
+    return winningCombos.some(combo => 
+      combo.every(num => triggered.has(num))
+    );
   };
 
   const handleSquareClick = (index: number) => {
@@ -82,11 +84,13 @@ export const BingoBoard = () => {
           newSet.delete(index);
         } else {
           newSet.add(index);
-        }
-        // Check for bingo after updating
-        if (checkForBingo(newSet) && !hasWon) {
-          setHasWon(true);
-          setPrizeLine(prizes[Math.floor(Math.random() * prizes.length)]);
+          // Only check for bingo if we're adding a square and don't already have a win
+          if (!hasWon && newSet.size >= 5) { // Only check if we have enough squares for a win
+            if (checkForBingo(newSet)) {
+              setHasWon(true);
+              setPrizeLine(prizes[Math.floor(Math.random() * prizes.length)]);
+            }
+          }
         }
         return newSet;
       });
