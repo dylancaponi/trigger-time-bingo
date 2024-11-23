@@ -122,31 +122,37 @@ export const BingoBoard = () => {
   };
 
   const getFontSize = (text: string) => {
-    // Calculate characters per line based on square size
-    // Mobile squares are 60px, desktop 80px
-    // Assuming ~5px per character on mobile (more conservative)
-    const mobileCharsPerLine = Math.floor(60 / 5);  // ~12 chars
-    const desktopCharsPerLine = Math.floor(80 / 6); // ~13 chars
+    // Calculate base size based on viewport
+    const baseSize = {
+      mobile: {
+        maxChars: 10,
+        fontSize: 10,
+        minFontSize: 8
+      },
+      desktop: {
+        maxChars: 13,
+        fontSize: 14,
+        minFontSize: 10
+      }
+    };
 
-    // Calculate optimal size based on text length and available space
-    const textLength = text.length;
-    const lines = Math.ceil(textLength / mobileCharsPerLine);
-    
-    // Available height is ~45px (more conservative for mobile)
-    const maxHeight = 45;
-    const targetLineHeight = Math.floor(maxHeight / lines);
+    // Calculate size reduction based on text length
+    const getReducedSize = (length: number, config: typeof baseSize.mobile) => {
+      if (length <= config.maxChars) return config.fontSize;
+      
+      // Reduce font size based on length, but never below minFontSize
+      const reduction = Math.floor((length - config.maxChars) / 5);
+      return Math.max(config.fontSize - reduction, config.minFontSize);
+    };
 
-    // Convert to appropriate text size class
-    // Each line should be roughly 1.2x the font size
-    const mobileFontSize = Math.min(Math.floor(targetLineHeight / 1.2), 8); // Reduced from 10 to 8
-    
-    // Add a random query parameter to force style recalculation
-    const timestamp = Date.now();
-    return `text-[${mobileFontSize}px] sm:text-[14px] style-${timestamp}`;
+    const mobileFontSize = getReducedSize(text.length, baseSize.mobile);
+    const desktopFontSize = getReducedSize(text.length, baseSize.desktop);
+
+    return `text-[${mobileFontSize}px] sm:text-[${desktopFontSize}px] leading-tight`;
   };
 
   return (
-    <Card className="w-full max-w-xl mx-auto px-2 sm:px-4">
+    <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
         <div>
           <CardTitle>Family Gathering Bingo</CardTitle>
@@ -231,10 +237,13 @@ export const BingoBoard = () => {
               onClick={() => handleSquareClick(index)}
               className={`
                 aspect-square border-2 border-gray-300 
-                flex items-center justify-center p-1
+                flex items-center justify-center
                 cursor-pointer hover:border-blue-500
                 min-h-[60px] sm:min-h-[80px]
                 min-w-[60px] sm:min-w-[80px]
+                max-w-[60px] sm:max-w-[80px]
+                p-0.5 sm:p-1
+                overflow-hidden
                 ${index === 12 ? 'bg-gray-100' : ''}
                 ${currentEdit === index ? 'border-blue-500 bg-blue-50 shadow-sm' : ''}
               `}
@@ -253,21 +262,21 @@ export const BingoBoard = () => {
                   }}
                 />
               ) : (
-                <span className="text-center break-words text-gray-500 hover:text-gray-800 transition-colors group h-full flex flex-col relative">
-                  <div className="flex-1 flex items-center justify-center">
+                <span className="text-center break-words text-gray-500 hover:text-gray-800 transition-colors group h-full w-full flex flex-col relative">
+                  <div className="flex-1 flex items-center justify-center w-full">
                     <div className={`
-                      leading-tight 
                       ${getFontSize(text)} 
                       max-w-full 
-                      px-1
+                      px-0.5
                       max-h-full
                       overflow-hidden
                       text-ellipsis
+                      line-clamp-4
                     `}>
                       {text}
                     </div>
                   </div>
-                  <div className="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 w-full">
+                  <div className="text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-0.5 w-full">
                     Click to edit
                   </div>
                 </span>

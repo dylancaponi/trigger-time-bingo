@@ -72,7 +72,9 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    import("tailwindcss-animate"),
+  ],
   safelist: [
     'grid-cols-3',
     'grid-cols-4',
