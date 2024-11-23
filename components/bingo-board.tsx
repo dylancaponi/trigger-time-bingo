@@ -370,7 +370,7 @@ export const BingoBoard = () => {
                   <div className={`
                     absolute inset-0 flex items-center justify-center
                     transition-opacity duration-200
-                    ${isPlaying ? 'opacity-100 bg-red-100/80' : 'opacity-0 pointer-events-none'}
+                    ${isPlaying ? 'opacity-100 bg-red-100/80 z-10' : 'opacity-0 pointer-events-none'}
                   `}>
                     <div className="transform rotate-[-35deg] text-red-600 font-bold text-lg sm:text-xl border-2 border-red-600 px-2 py-1">
                       TRIGGERED!
