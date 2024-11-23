@@ -41,6 +41,7 @@ export const BingoBoard = () => {
   const textRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const handleSquareClick = (index: number) => {
+    if (currentEdit !== null) return;
     setCurrentEdit(index);
   };
 
@@ -163,19 +164,22 @@ export const BingoBoard = () => {
   }, [squares, currentEdit]);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      // Get the edit overlay element
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       const editOverlay = document.querySelector('[data-edit-overlay]');
       
-      // Only close if the click is outside the edit overlay
-      if (currentEdit !== null && editOverlay && !editOverlay.contains(e.target as Node)) {
+      const target = (e as TouchEvent).touches?.[0]?.target || (e as MouseEvent).target;
+      
+      if (currentEdit !== null && editOverlay && !editOverlay.contains(target as Node)) {
         setCurrentEdit(null);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [currentEdit]);
 
@@ -313,21 +317,27 @@ export const BingoBoard = () => {
             </div>
           ))}
           <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 z-10 border-2 border-blue-500 bg-blue-50 shadow-lg flex items-center justify-center pointer-events-none"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 z-10 border-2 border-blue-500 bg-blue-50 shadow-lg flex items-center justify-center"
               data-edit-overlay
               style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
-                transform: `translate(-50%, -50%) scale(${currentEdit !== null ? 1 : 0})`,
+                transform: currentEdit !== null 
+                  ? 'translate(-50%, -50%) scale(1)'
+                  : 'translate(-50%, -50%) scale(0)',
                 opacity: currentEdit !== null ? 1 : 0,
                 zIndex: 1000,
                 width: '80%',
                 height: '80%',
-                transition: 'all 0.2s ease-out',
+                transition: 'transform 0.2s ease-out, opacity 0.2s ease-out',
                 transformOrigin: 'center',
                 visibility: currentEdit !== null ? 'visible' : 'hidden',
                 pointerEvents: currentEdit !== null ? 'auto' : 'none',
+                WebkitTransform: currentEdit !== null 
+                  ? 'translate(-50%, -50%) scale(1)'
+                  : 'translate(-50%, -50%) scale(0)',
+                WebkitTransition: '-webkit-transform 0.2s ease-out, opacity 0.2s ease-out',
               }}
             >
               {currentEdit !== null && (
