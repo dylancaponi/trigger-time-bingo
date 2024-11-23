@@ -279,6 +279,7 @@ export const BingoBoard = () => {
     setTriggeredSquares(new Set());
     setHasWon(false);
     setPrizeLine('');
+    setIsPlaying(false);
   };
 
   return (
