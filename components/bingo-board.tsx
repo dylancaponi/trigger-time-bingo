@@ -38,7 +38,7 @@ export const BingoBoard = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
 
-  const textRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const textRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const handleSquareClick = (index: number) => {
     setCurrentEdit(index);
@@ -289,7 +289,9 @@ export const BingoBoard = () => {
               <div className="w-full h-full relative group">
                 <div className="absolute inset-0 flex flex-col justify-center items-center">
                   <div 
-                    ref={(el) => (textRefs.current[index] = el)}
+                    ref={(el: HTMLDivElement | null) => {
+                      textRefs.current[index] = el;
+                    }}
                     className={`
                       ${getTextStyles()}
                       text-gray-500 hover:text-gray-800 transition-colors
