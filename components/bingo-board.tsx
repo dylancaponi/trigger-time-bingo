@@ -404,7 +404,7 @@ export const BingoBoard = () => {
           </Button>
 
           <Button
-            onClick={async (e) => {
+            onClick={async () => {
               try {
                 // Silently save without alerts
                 const boardId = await saveBoard();
