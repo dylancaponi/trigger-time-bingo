@@ -2,27 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Shuffle, Save, Upload, Play, Ban, Settings2, Share } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Redis } from '@upstash/redis'
 import { getBoardIdFromUrl, updateUrlWithBoardId } from '@/lib/utils'
-
-const redis = new Redis({
-  url: process.env.NEXT_PUBLIC_KV_REST_API_URL!,
-  token: process.env.NEXT_PUBLIC_KV_REST_API_TOKEN!,
-})
-
-console.log('Redis credentials:', {
-  hasUrl: !!process.env.NEXT_PUBLIC_KV_REST_API_URL,
-  hasToken: !!process.env.NEXT_PUBLIC_KV_REST_API_TOKEN,
-  url: process.env.NEXT_PUBLIC_KV_REST_API_URL,
-  // Don't log the full token for security
-  tokenPreview: process.env.NEXT_PUBLIC_KV_REST_API_TOKEN?.slice(0, 5)
-})
-
-// Add this interface near the top of the file
-interface BoardData {
-  squares: string[];
-  createdAt: string;
-}
 
 export const BingoBoard = () => {
   const defaultSquares = [
@@ -197,23 +177,20 @@ export const BingoBoard = () => {
 
   const saveBoard = async () => {
     try {
-      console.log('Starting save...');
-      // Use existing board ID or generate new one
       const boardId = currentBoardId || crypto.randomUUID()
-      console.log('Using boardId:', boardId);
       
-      await redis.set(`board:${boardId}`, {
-        squares,
-        createdAt: new Date().toISOString()
-      }, {
-        ex: 60 * 60 * 24 * 7 // Expire after 7 days (in seconds)
+      const response = await fetch('/api/board', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          boardId,
+          squares
+        })
       })
-      console.log('Saved to Redis successfully');
       
-      // Store the board ID if it's new
-      if (!currentBoardId) {
-        setCurrentBoardId(boardId);
-      }
+      if (!response.ok) throw new Error('Failed to save board')
       
       return boardId
     } catch (error) {
@@ -224,17 +201,19 @@ export const BingoBoard = () => {
 
   const loadBoard = async (boardId: string) => {
     try {
-      const board = await redis.get<BoardData>(`board:${boardId}`);
+      const response = await fetch(`/api/board?id=${boardId}`)
+      if (!response.ok) throw new Error('Failed to load board')
+      
+      const board = await response.json()
       if (board && board.squares) {
-        setSquares(board.squares);
-        // Store the loaded board ID
-        setCurrentBoardId(boardId);
+        setSquares(board.squares)
+        setCurrentBoardId(boardId)
       }
     } catch (error) {
-      console.error('Error loading board:', error);
-      throw new Error('Failed to load board');
+      console.error('Error loading board:', error)
+      throw new Error('Failed to load board')
     }
-  };
+  }
 
   const handleSave = async () => {
     try {
@@ -425,7 +404,7 @@ export const BingoBoard = () => {
           </Button>
 
           <Button
-            onClick={async () => {
+            onClick={async (e) => {
               try {
                 // Silently save without alerts
                 const boardId = await saveBoard();
@@ -433,14 +412,18 @@ export const BingoBoard = () => {
                   updateUrlWithBoardId(boardId);
                 }
                 
-                try {
-                  await navigator.share({
+                // The share must be triggered directly from the click event
+                if (navigator.share) {
+                  navigator.share({
                     title: 'Trigger Time Bingo',
                     text: 'Ready to turn family drama into a game?',
                     url: window.location.href
+                  }).catch(() => {
+                    // If share is cancelled or fails, fall back to clipboard
+                    navigator.clipboard.writeText(window.location.href);
+                    alert('URL copied to clipboard!');
                   });
-                } catch {
-                  // If share fails or is dismissed, fall back to clipboard
+                } else {
                   await navigator.clipboard.writeText(window.location.href);
                   alert('URL copied to clipboard!');
                 }
