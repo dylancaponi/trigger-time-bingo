@@ -1,7 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Shuffle, Save, Upload, Play, Ban, Settings2 } from 'lucide-react';
+import { Shuffle, Save, Upload, Play, Ban, Settings2, Share } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Redis } from '@upstash/redis'
+import { getBoardIdFromUrl, updateUrlWithBoardId } from '@/lib/utils'
+
+const redis = new Redis({
+  url: process.env.NEXT_PUBLIC_KV_REST_API_URL!,
+  token: process.env.NEXT_PUBLIC_KV_REST_API_TOKEN!,
+})
+
+console.log('Redis credentials:', {
+  hasUrl: !!process.env.NEXT_PUBLIC_KV_REST_API_URL,
+  hasToken: !!process.env.NEXT_PUBLIC_KV_REST_API_TOKEN,
+  url: process.env.NEXT_PUBLIC_KV_REST_API_URL,
+  // Don't log the full token for security
+  tokenPreview: process.env.NEXT_PUBLIC_KV_REST_API_TOKEN?.slice(0, 5)
+})
 
 export const BingoBoard = () => {
   const defaultSquares = [
@@ -45,6 +60,7 @@ export const BingoBoard = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [hasWon, setHasWon] = useState(false);
   const [prizeLine, setPrizeLine] = useState('');
+  const [currentBoardId, setCurrentBoardId] = useState<string | null>(null);
 
   const prizes = [
     "Congratulations! You've witnessed peak family dysfunction! 🎭",
@@ -173,17 +189,60 @@ export const BingoBoard = () => {
     setSquares(result);
   };
 
-  const saveBoard = () => {
-    const data = JSON.stringify(squares, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    if (downloadRef.current) {
-      downloadRef.current.href = url;
-      downloadRef.current.download = 'bingo-board.json';
-      downloadRef.current.click();
+  const saveBoard = async () => {
+    try {
+      console.log('Starting save...');
+      // Use existing board ID or generate new one
+      const boardId = currentBoardId || crypto.randomUUID()
+      console.log('Using boardId:', boardId);
+      
+      await redis.set(`board:${boardId}`, {
+        squares,
+        createdAt: new Date().toISOString()
+      }, {
+        ex: 60 * 60 * 24 * 7 // Expire after 7 days (in seconds)
+      })
+      console.log('Saved to Redis successfully');
+      
+      // Store the board ID if it's new
+      if (!currentBoardId) {
+        setCurrentBoardId(boardId);
+      }
+      
+      return boardId
+    } catch (error) {
+      console.error('Error saving board:', error)
+      throw error
     }
-    URL.revokeObjectURL(url);
-  };
+  }
+
+  const loadBoard = async (boardId: string) => {
+    try {
+      const board = await redis.get(`board:${boardId}`)
+      if (board && board.squares) {
+        setSquares(board.squares)
+        // Store the loaded board ID
+        setCurrentBoardId(boardId)
+      }
+    } catch (error) {
+      console.error('Error loading board:', error)
+      throw new Error('Failed to load board')
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const boardId = await saveBoard()
+      updateUrlWithBoardId(boardId)
+      alert(currentBoardId 
+        ? 'Board updated! The share URL remains the same.' 
+        : 'Board saved! Share this URL to let others use your board.'
+      )
+    } catch (error) {
+      console.error('Save failed:', error);
+      alert('Failed to save board: ' + (error instanceof Error ? error.message : String(error)))
+    }
+  }
 
   const loadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -282,6 +341,13 @@ export const BingoBoard = () => {
     setIsPlaying(false);
   };
 
+  useEffect(() => {
+    const boardId = getBoardIdFromUrl()
+    if (boardId) {
+      loadBoard(boardId)
+    }
+  }, []) // Load board on initial mount if ID exists
+
   return (
     <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
@@ -352,6 +418,36 @@ export const BingoBoard = () => {
             {isPlaying ? 'Stop' : 'Play'}
           </Button>
 
+          <Button
+            onClick={async () => {
+              try {
+                // Silently save without alerts
+                const boardId = await saveBoard();
+                if (!currentBoardId) {
+                  updateUrlWithBoardId(boardId);
+                }
+                
+                try {
+                  await navigator.share({
+                    title: 'Trigger Time Bingo',
+                    text: 'Ready to turn family drama into a game?',
+                    url: window.location.href
+                  });
+                } catch {
+                  // If share fails or is dismissed, fall back to clipboard
+                  await navigator.clipboard.writeText(window.location.href);
+                  alert('URL copied to clipboard!');
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
+              }
+            }}
+            className="flex items-center gap-2">
+            <Share className="w-4 h-4" />
+            Share
+          </Button>
+
           <div className="relative ml-auto">
             <Button 
               variant="outline" 
@@ -359,12 +455,39 @@ export const BingoBoard = () => {
               className="w-9 h-9"
               onClick={() => setShowAdvanced(!showAdvanced)}
               aria-label="Advanced options"
+              disabled={isPlaying}
             >
               <Settings2 className="w-4 h-4" />
             </Button>
 
             {showAdvanced && (
               <div className="absolute top-full right-0 mt-1 bg-white border rounded-md shadow-lg py-1 min-w-[150px] z-50">
+                <button 
+                  onClick={() => {
+                    if (window.confirm('This will clear all squares and create a new board. Are you sure?')) {
+                      // Create empty squares array with FREE SPACE in center
+                      const emptySquares = Array(25).fill('').map((_, index) => 
+                        index === 12 ? 'FREE SPACE' : ''
+                      );
+                      setSquares(emptySquares);
+                      setCurrentBoardId(null); // Reset board ID to force new one on save
+                      setTriggeredSquares(new Set()); // Reset any game progress
+                      setHasWon(false);
+                      setPrizeLine('');
+                      
+                      // Clear the board ID from URL
+                      const url = new URL(window.location.href);
+                      url.searchParams.delete('board');
+                      window.history.pushState({}, '', url);
+                    }
+                    setShowAdvanced(false);
+                  }}
+                  disabled={isPlaying}
+                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  <Ban className="w-4 h-4" />
+                  New Blank Board
+                </button>
                 <button 
                   onClick={() => {
                     fileInputRef.current?.click();
@@ -378,10 +501,11 @@ export const BingoBoard = () => {
                 </button>
                 <button 
                   onClick={() => {
-                    saveBoard();
+                    handleSave();
                     setShowAdvanced(false);
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
+                  disabled={isPlaying}
+                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   Save Board
@@ -489,6 +613,7 @@ export const BingoBoard = () => {
                     fontSize: '24px',
                     lineHeight: '1.2',
                   }}
+                  onFocus={(e) => e.target.select()}
                 />
               )}
             </div>
