@@ -18,6 +18,12 @@ console.log('Redis credentials:', {
   tokenPreview: process.env.NEXT_PUBLIC_KV_REST_API_TOKEN?.slice(0, 5)
 })
 
+// Add this interface near the top of the file
+interface BoardData {
+  squares: string[];
+  createdAt: string;
+}
+
 export const BingoBoard = () => {
   const defaultSquares = [
     "So... getting married soon?",
@@ -218,17 +224,17 @@ export const BingoBoard = () => {
 
   const loadBoard = async (boardId: string) => {
     try {
-      const board = await redis.get(`board:${boardId}`)
+      const board = await redis.get<BoardData>(`board:${boardId}`);
       if (board && board.squares) {
-        setSquares(board.squares)
+        setSquares(board.squares);
         // Store the loaded board ID
-        setCurrentBoardId(boardId)
+        setCurrentBoardId(boardId);
       }
     } catch (error) {
-      console.error('Error loading board:', error)
-      throw new Error('Failed to load board')
+      console.error('Error loading board:', error);
+      throw new Error('Failed to load board');
     }
-  }
+  };
 
   const handleSave = async () => {
     try {
