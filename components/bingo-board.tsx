@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Shuffle, Save, Upload, Play, Ban, Settings2, Share } from 'lucide-react';
+import { Shuffle, Save, Upload, Play, PlusSquare, Settings2, Share, Cloud } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { getBoardIdFromUrl, updateUrlWithBoardId } from '@/lib/utils'
@@ -177,7 +177,8 @@ export const BingoBoard = () => {
 
   const saveBoard = async () => {
     try {
-      const boardId = currentBoardId || crypto.randomUUID()
+      // Use existing boardId from URL or create new one only if none exists
+      const boardId = getBoardIdFromUrl() || currentBoardId || crypto.randomUUID()
       
       const response = await fetch('/api/board', {
         method: 'POST',
@@ -192,6 +193,7 @@ export const BingoBoard = () => {
       
       if (!response.ok) throw new Error('Failed to save board')
       
+      setCurrentBoardId(boardId) // Ensure currentBoardId is set
       return boardId
     } catch (error) {
       console.error('Error saving board:', error)
@@ -218,14 +220,14 @@ export const BingoBoard = () => {
   const handleSave = async () => {
     try {
       const boardId = await saveBoard()
-      updateUrlWithBoardId(boardId)
-      alert(currentBoardId 
-        ? 'Board updated! The share URL remains the same.' 
-        : 'Board saved! Share this URL to let others use your board.'
-      )
+      // Only update URL if there isn't already a board ID
+      if (!getBoardIdFromUrl()) {
+        updateUrlWithBoardId(boardId)
+      }
+      return true // Return success instead of showing alert
     } catch (error) {
       console.error('Save failed:', error);
-      alert('Failed to save board: ' + (error instanceof Error ? error.message : String(error)))
+      throw error
     }
   }
 
@@ -337,12 +339,12 @@ export const BingoBoard = () => {
     <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
         <div>
-          <CardTitle>Family Gathering Bingo</CardTitle>
+          <CardTitle>Trigger Time Bingo™</CardTitle>
           <p className="text-sm text-muted-foreground mt-1 italic">
-            (aka Trigger Time Bingo™)
+            (aka Family Gathering Bingo)
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Click any square to customize it with your own family&apos;s quirks!
+            Click any square to customize it with your own family's quirks!
           </p>
         </div>
         <div className="space-y-4 text-sm text-muted-foreground">
@@ -373,7 +375,7 @@ export const BingoBoard = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-2 items-center relative">
+        <div className="flex flex-col gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -384,124 +386,148 @@ export const BingoBoard = () => {
           />
           <a ref={downloadRef} className="hidden" />
           
-          <Button
-            onClick={async () => {
-              try {
-                // Silently save without alerts
-                const boardId = await saveBoard();
-                if (!currentBoardId) {
-                  updateUrlWithBoardId(boardId);
+          <div className="flex gap-2">
+            <Button
+              onClick={async () => {
+                try {
+                  const boardId = await saveBoard()
+                  // Only update URL if there isn't already a board ID
+                  if (!getBoardIdFromUrl()) {
+                    updateUrlWithBoardId(boardId)
+                  }
+                  
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'Trigger Time Bingo',
+                      text: 'Ready to turn family drama into a game?',
+                      url: window.location.href
+                    }).catch(() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      alert('URL copied to clipboard!\n\nNote: Shared boards expire after 7 days. Use Advanced → Save to File for permanent storage.');
+                    });
+                  } else {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('URL copied to clipboard!\n\nNote: Shared boards expire after 7 days. Use Advanced → Save to File for permanent storage.');
+                  }
+                } catch (error) {
+                  console.error('Error:', error);
+                  alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
                 }
-                
-                // The share must be triggered directly from the click event
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Trigger Time Bingo',
-                    text: 'Ready to turn family drama into a game?',
-                    url: window.location.href
-                  }).catch(() => {
-                    // If share is cancelled or fails, fall back to clipboard
-                    navigator.clipboard.writeText(window.location.href);
-                    alert('URL copied to clipboard!');
-                  });
-                } else {
-                  await navigator.clipboard.writeText(window.location.href);
-                  alert('URL copied to clipboard!');
-                }
-              } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
-              }
-            }}
-            className="flex items-center gap-2">
-            <Share className="w-4 h-4" />
-            Save & Share
-          </Button>
-
-          <Button
-            onClick={shuffleBoard}
-            className="flex items-center gap-2"
-            disabled={isPlaying}
-          >
-            <Shuffle className="w-4 h-4" />
-            Shuffle
-          </Button>
-
-          <Button
-            onClick={() => {
-              setIsPlaying(!isPlaying);
-            }}
-            className="flex items-center gap-2"
-            variant={isPlaying ? "destructive" : "default"}
-          >
-            {isPlaying ? <Ban className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {isPlaying ? 'Stop' : 'Play'}
-          </Button>
-
-          <div className="relative ml-auto">
-            <Button 
-              variant="outline" 
-              size="icon"
-              className="w-9 h-9"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              aria-label="Advanced options"
-              disabled={isPlaying}
-            >
-              <Settings2 className="w-4 h-4" />
+              }}
+              className="flex items-center gap-2 h-10">
+              <Share className="w-4 h-4" />
+              Save & Share
             </Button>
 
-            {showAdvanced && (
-              <div className="absolute top-full right-0 mt-1 bg-white border rounded-md shadow-lg py-1 min-w-[150px] z-50">
-                <button 
-                  onClick={() => {
-                    if (window.confirm('This will clear all squares and create a new board. Are you sure?')) {
-                      // Create empty squares array with FREE SPACE in center
-                      const emptySquares = Array(25).fill('').map((_, index) => 
-                        index === 12 ? 'FREE SPACE' : ''
-                      );
-                      setSquares(emptySquares);
-                      setCurrentBoardId(null); // Reset board ID to force new one on save
-                      setTriggeredSquares(new Set()); // Reset any game progress
-                      setHasWon(false);
-                      setPrizeLine('');
-                      
-                      // Clear the board ID from URL
-                      const url = new URL(window.location.href);
-                      url.searchParams.delete('board');
-                      window.history.pushState({}, '', url);
-                    }
-                    setShowAdvanced(false);
-                  }}
-                  disabled={isPlaying}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
-                >
-                  <Ban className="w-4 h-4" />
-                  New Blank Board
-                </button>
-                <button 
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                    setShowAdvanced(false);
-                  }}
-                  disabled={isPlaying}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
-                >
-                  <Upload className="w-4 h-4" />
-                  Load Board
-                </button>
-                <button 
-                  onClick={() => {
-                    handleSave();
-                    setShowAdvanced(false);
-                  }}
-                  disabled={isPlaying}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  Save Board
-                </button>
-              </div>
-            )}
+            <Button
+              onClick={shuffleBoard}
+              className="flex items-center gap-2 h-10"
+              disabled={isPlaying}
+            >
+              <Shuffle className="w-4 h-4" />
+              Shuffle
+            </Button>
+
+            <Button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="flex items-center gap-2 h-10"
+              variant={isPlaying ? "destructive" : "default"}
+            >
+              {isPlaying ? <PlusSquare className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+              {isPlaying ? 'Stop' : 'Play'}
+            </Button>
+
+            <div className="relative ml-auto">
+              <Button 
+                variant="outline"
+                size="icon"
+                className="w-10 h-10"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                aria-label="Advanced options"
+                disabled={isPlaying}
+              >
+                <Settings2 className="w-4 h-4" />
+              </Button>
+
+              {showAdvanced && (
+                <div className="absolute top-full right-0 mt-1 bg-white border rounded-md shadow-lg py-1 min-w-[150px] z-50">
+                  <button 
+                    onClick={() => {
+                      if (window.confirm('This will clear all squares and create a new board. Are you sure?')) {
+                        // Create empty squares array with FREE SPACE in center
+                        const emptySquares = Array(25).fill('').map((_, index) => 
+                          index === 12 ? 'FREE SPACE' : ''
+                        );
+                        setSquares(emptySquares);
+                        setCurrentBoardId(null); // Reset board ID to force new one on save
+                        setTriggeredSquares(new Set()); // Reset any game progress
+                        setHasWon(false);
+                        setPrizeLine('');
+                        
+                        // Clear the board ID from URL
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('board');
+                        window.history.pushState({}, '', url);
+                      }
+                      setShowAdvanced(false);
+                    }}
+                    disabled={isPlaying}
+                    className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    <PlusSquare className="w-4 h-4" />
+                    New Board
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        await handleSave();
+                        alert('Board saved successfully!\n\nNote: Shared boards expire after 7 days. Use Advanced → Save to File for permanent storage.');
+                      } catch (error) {
+                        console.error('Save failed:', error);
+                        alert('Failed to save board: ' + (error instanceof Error ? error.message : String(error)));
+                      }
+                      setShowAdvanced(false);
+                    }}
+                    disabled={isPlaying}
+                    className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    <Cloud className="w-4 h-4" />
+                    Save to Cloud
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const boardData = JSON.stringify(squares, null, 2);
+                      const blob = new Blob([boardData], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'bingo-board.json';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      setShowAdvanced(false);
+                    }}
+                    disabled={isPlaying}
+                    className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save to File
+                  </button>
+                  <button 
+                    onClick={() => {
+                      fileInputRef.current?.click();
+                      setShowAdvanced(false);
+                    }}
+                    disabled={isPlaying}
+                    className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Load File
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
