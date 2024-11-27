@@ -384,25 +384,6 @@ export const BingoBoard = () => {
           />
           <a ref={downloadRef} className="hidden" />
           
-          <Button 
-            onClick={shuffleBoard}
-            className="flex items-center gap-2"
-            disabled={isPlaying}
-          >
-            <Shuffle className="w-4 h-4" />
-            Shuffle
-          </Button>
-          <Button 
-            onClick={() => {
-              setIsPlaying(!isPlaying);
-            }}
-            className="flex items-center gap-2"
-            variant={isPlaying ? "destructive" : "default"}
-          >
-            {isPlaying ? <Ban className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {isPlaying ? 'Stop' : 'Play'}
-          </Button>
-
           <Button
             onClick={async () => {
               try {
@@ -434,7 +415,27 @@ export const BingoBoard = () => {
             }}
             className="flex items-center gap-2">
             <Share className="w-4 h-4" />
-            Share
+            Save & Share
+          </Button>
+
+          <Button
+            onClick={shuffleBoard}
+            className="flex items-center gap-2"
+            disabled={isPlaying}
+          >
+            <Shuffle className="w-4 h-4" />
+            Shuffle
+          </Button>
+
+          <Button
+            onClick={() => {
+              setIsPlaying(!isPlaying);
+            }}
+            className="flex items-center gap-2"
+            variant={isPlaying ? "destructive" : "default"}
+          >
+            {isPlaying ? <Ban className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isPlaying ? 'Stop' : 'Play'}
           </Button>
 
           <div className="relative ml-auto">
