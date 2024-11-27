@@ -344,7 +344,7 @@ export const BingoBoard = () => {
             (aka Family Gathering Bingo)
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Click any square to customize it with your own family's quirks!
+            Click any square to customize it with your own family&apos;s quirks!
           </p>
         </div>
         <div className="space-y-4 text-sm text-muted-foreground">
