@@ -335,6 +335,25 @@ export const BingoBoard = () => {
     }
   }, []) // Load board on initial mount if ID exists
 
+  const [showButtonText, setShowButtonText] = useState(true);
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = buttonContainerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        // If container width is less than 400px, hide text
+        // Adjust this threshold based on your needs
+        setShowButtonText(entry.contentRect.width >= 400);
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, []);
+
   return (
     <Card className="w-full max-w-xl mx-auto px-2 sm:px-4 overflow-hidden">
       <CardHeader className="space-y-4">
@@ -386,7 +405,7 @@ export const BingoBoard = () => {
           />
           <a ref={downloadRef} className="hidden" />
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" ref={buttonContainerRef}>
             <Button
               onClick={async () => {
                 try {
@@ -414,31 +433,34 @@ export const BingoBoard = () => {
                   alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
                 }
               }}
-              className="flex items-center gap-2 h-10 sm:w-auto w-10"
+              className="flex items-center gap-2 h-10"
+              style={{ width: showButtonText ? 'auto' : '2.5rem' }}
               title="Save & Share"
             >
               <Share className="w-4 h-4" />
-              <span className="hidden sm:inline">Save & Share</span>
+              {showButtonText && <span>Save & Share</span>}
             </Button>
 
             <Button
               onClick={shuffleBoard}
-              className="flex items-center gap-2 h-10 sm:w-auto w-10"
+              className="flex items-center gap-2 h-10"
+              style={{ width: showButtonText ? 'auto' : '2.5rem' }}
               disabled={isPlaying}
               title="Shuffle"
             >
               <Shuffle className="w-4 h-4" />
-              <span className="hidden sm:inline">Shuffle</span>
+              {showButtonText && <span>Shuffle</span>}
             </Button>
 
             <Button
               onClick={() => setIsPlaying(!isPlaying)}
-              className="flex items-center gap-2 h-10 sm:w-auto w-10"
+              className="flex items-center gap-2 h-10"
+              style={{ width: showButtonText ? 'auto' : '2.5rem' }}
               variant={isPlaying ? "destructive" : "default"}
               title={isPlaying ? 'Stop' : 'Play'}
             >
               {isPlaying ? <PlusSquare className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              <span className="hidden sm:inline">{isPlaying ? 'Stop' : 'Play'}</span>
+              {showButtonText && <span>{isPlaying ? 'Stop' : 'Play'}</span>}
             </Button>
 
             <div className="relative ml-auto">
