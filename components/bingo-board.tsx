@@ -386,7 +386,7 @@ export const BingoBoard = () => {
           />
           <a ref={downloadRef} className="hidden" />
           
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={async () => {
                 try {
@@ -414,27 +414,31 @@ export const BingoBoard = () => {
                   alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
                 }
               }}
-              className="flex items-center gap-2 h-10">
+              className="flex items-center gap-2 h-10 sm:w-auto w-10"
+              title="Save & Share"
+            >
               <Share className="w-4 h-4" />
-              Save & Share
+              <span className="hidden sm:inline">Save & Share</span>
             </Button>
 
             <Button
               onClick={shuffleBoard}
-              className="flex items-center gap-2 h-10"
+              className="flex items-center gap-2 h-10 sm:w-auto w-10"
               disabled={isPlaying}
+              title="Shuffle"
             >
               <Shuffle className="w-4 h-4" />
-              Shuffle
+              <span className="hidden sm:inline">Shuffle</span>
             </Button>
 
             <Button
               onClick={() => setIsPlaying(!isPlaying)}
-              className="flex items-center gap-2 h-10"
+              className="flex items-center gap-2 h-10 sm:w-auto w-10"
               variant={isPlaying ? "destructive" : "default"}
+              title={isPlaying ? 'Stop' : 'Play'}
             >
               {isPlaying ? <PlusSquare className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {isPlaying ? 'Stop' : 'Play'}
+              <span className="hidden sm:inline">{isPlaying ? 'Stop' : 'Play'}</span>
             </Button>
 
             <div className="relative ml-auto">
