@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { getBoardIdFromUrl, updateUrlWithBoardId } from '@/lib/utils'
 
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
 export const BingoBoard = () => {
   const defaultSquares = [
     "So... getting married soon?",
@@ -335,23 +346,45 @@ export const BingoBoard = () => {
     }
   }, []) // Load board on initial mount if ID exists
 
-  const [showButtonText, setShowButtonText] = useState(true);
+  const [buttonFontSize, setButtonFontSize] = useState(14); // default font size in px
   const buttonContainerRef = useRef<HTMLDivElement>(null);
+  const [showIcons, setShowIcons] = useState(true);
+  const [showText, setShowText] = useState(true);
 
   useEffect(() => {
     const container = buttonContainerRef.current;
     if (!container) return;
 
-    const resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        // If container width is less than 400px, hide text
-        // Adjust this threshold based on your needs
-        setShowButtonText(entry.contentRect.width >= 400);
+    const handleResize = debounce(() => {
+      const containerWidth = container.offsetWidth;
+      console.log('Container width:', containerWidth);
+      
+      if (containerWidth < 375) {
+        setShowIcons(true);
+        setShowText(false);
+        setButtonFontSize(10);
+        console.log('Setting icons only mode');
+      } else if (containerWidth < 450) {
+        setShowIcons(false);
+        setShowText(true);
+        setButtonFontSize(11);
+        console.log('Setting text only mode');
+      } else {
+        setShowIcons(true);
+        setShowText(true);
+        setButtonFontSize(12);
+        console.log('Setting full mode');
       }
-    });
+    }, 500);
 
+    const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(container);
-    return () => resizeObserver.disconnect();
+    
+    handleResize();
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
 
   return (
@@ -405,7 +438,7 @@ export const BingoBoard = () => {
           />
           <a ref={downloadRef} className="hidden" />
           
-          <div className="flex flex-wrap gap-2" ref={buttonContainerRef}>
+          <div className="flex flex-nowrap gap-2 w-full overflow-hidden" ref={buttonContainerRef}>
             <Button
               onClick={async () => {
                 try {
@@ -433,37 +466,46 @@ export const BingoBoard = () => {
                   alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
                 }
               }}
-              className="flex items-center gap-2 h-10"
-              style={{ width: showButtonText ? 'auto' : '2.5rem' }}
+              className="flex items-center gap-2 h-10 whitespace-nowrap shrink-0"
+              style={{ 
+                fontSize: `${buttonFontSize}px`,
+                width: showText ? 'auto' : '2.5rem'
+              }}
               title="Save & Share"
             >
-              <Share className="w-4 h-4" />
-              {showButtonText && <span>Save & Share</span>}
+              {showIcons && <Share className="w-4 h-4" />}
+              {showText && <span>Save & Share</span>}
             </Button>
 
             <Button
               onClick={shuffleBoard}
-              className="flex items-center gap-2 h-10"
-              style={{ width: showButtonText ? 'auto' : '2.5rem' }}
+              className="flex items-center gap-2 h-10 whitespace-nowrap shrink-0"
+              style={{ 
+                fontSize: `${buttonFontSize}px`,
+                width: showText ? 'auto' : '2.5rem'
+              }}
               disabled={isPlaying}
               title="Shuffle"
             >
-              <Shuffle className="w-4 h-4" />
-              {showButtonText && <span>Shuffle</span>}
+              {showIcons && <Shuffle className="w-4 h-4" />}
+              {showText && <span>Shuffle</span>}
             </Button>
 
             <Button
               onClick={() => setIsPlaying(!isPlaying)}
-              className="flex items-center gap-2 h-10"
-              style={{ width: showButtonText ? 'auto' : '2.5rem' }}
+              className="flex items-center gap-2 h-10 whitespace-nowrap shrink-0"
+              style={{ 
+                fontSize: `${buttonFontSize}px`,
+                width: showText ? 'auto' : '2.5rem'
+              }}
               variant={isPlaying ? "destructive" : "default"}
               title={isPlaying ? 'Stop' : 'Play'}
             >
-              {isPlaying ? <PlusSquare className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {showButtonText && <span>{isPlaying ? 'Stop' : 'Play'}</span>}
+              {showIcons && (isPlaying ? <PlusSquare className="w-4 h-4" /> : <Play className="w-4 h-4" />)}
+              {showText && <span>{isPlaying ? 'Stop' : 'Play'}</span>}
             </Button>
 
-            <div className="relative ml-auto">
+            <div className="relative shrink-0">
               <Button 
                 variant="outline"
                 size="icon"
