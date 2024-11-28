@@ -359,20 +359,20 @@ export const BingoBoard = () => {
       const containerWidth = container.offsetWidth;
       console.log('Container width:', containerWidth);
       
-      if (containerWidth < 375) {
+      if (containerWidth < 310) {
         setShowIcons(true);
         setShowText(false);
-        setButtonFontSize(10);
+        setButtonFontSize(14); // Keep default size since it doesn't affect icons
         console.log('Setting icons only mode');
-      } else if (containerWidth < 450) {
+      } else if (containerWidth < 400) {
         setShowIcons(false);
         setShowText(true);
-        setButtonFontSize(11);
+        setButtonFontSize(13);
         console.log('Setting text only mode');
       } else {
         setShowIcons(true);
         setShowText(true);
-        setButtonFontSize(12);
+        setButtonFontSize(14);
         console.log('Setting full mode');
       }
     }, 500);
@@ -505,7 +505,7 @@ export const BingoBoard = () => {
               {showText && <span>{isPlaying ? 'Stop' : 'Play'}</span>}
             </Button>
 
-            <div className="relative shrink-0">
+            <div className="relative shrink-0 ml-auto">
               <Button 
                 variant="outline"
                 size="icon"
