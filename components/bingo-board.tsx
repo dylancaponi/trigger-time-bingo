@@ -386,7 +386,7 @@ export const BingoBoard = () => {
           />
           <a ref={downloadRef} className="hidden" />
           
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:justify-between gap-2">
             <Button
               onClick={async () => {
                 try {
@@ -414,41 +414,43 @@ export const BingoBoard = () => {
                   alert('Failed to share board: ' + (error instanceof Error ? error.message : String(error)));
                 }
               }}
-              className="flex items-center gap-2 h-10">
-              <Share className="w-4 h-4" />
-              Save & Share
+              className="flex items-center justify-center gap-2 h-10 w-full sm:basis-[24%]"
+              variant="default">
+              <Share />
+              <span>Share</span>
             </Button>
 
             <Button
               onClick={shuffleBoard}
-              className="flex items-center gap-2 h-10"
+              className="flex items-center justify-center gap-2 h-10 w-full sm:basis-[24%]"
               disabled={isPlaying}
             >
-              <Shuffle className="w-4 h-4" />
-              Shuffle
+              <Shuffle />
+              <span>Shuffle</span>
             </Button>
 
             <Button
               onClick={() => setIsPlaying(!isPlaying)}
-              className="flex items-center gap-2 h-10"
+              className="flex items-center justify-center gap-2 h-10 w-full sm:basis-[24%]"
               variant={isPlaying ? "destructive" : "default"}
             >
-              {isPlaying ? <PlusSquare className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+              {isPlaying ? <PlusSquare /> : <Play />}
               {isPlaying ? 'Stop' : 'Play'}
             </Button>
 
-            <div className="relative ml-auto">
+            <div className="relative w-full sm:basis-[24%]">
               <Button 
                 variant="outline"
                 size="icon"
-                className="w-10 h-10"
+                className="w-full h-10 flex items-center justify-center gap-2"
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 aria-label="Advanced options"
                 disabled={isPlaying}
               >
-                <Settings2 className="w-4 h-4" />
+                <Settings2 />
+                <span className="sm:hidden">More</span>
               </Button>
-
+              
               {showAdvanced && (
                 <div className="absolute top-full right-0 mt-1 bg-white border rounded-md shadow-lg py-1 min-w-[150px] z-50">
                   <button 
@@ -474,7 +476,7 @@ export const BingoBoard = () => {
                     disabled={isPlaying}
                     className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
                   >
-                    <PlusSquare className="w-4 h-4" />
+                    <PlusSquare />
                     New Board
                   </button>
                   <button 
@@ -491,7 +493,7 @@ export const BingoBoard = () => {
                     disabled={isPlaying}
                     className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
                   >
-                    <Cloud className="w-4 h-4" />
+                    <Cloud />
                     Save to Cloud
                   </button>
                   <button 
@@ -511,7 +513,7 @@ export const BingoBoard = () => {
                     disabled={isPlaying}
                     className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save />
                     Save to File
                   </button>
                   <button 
@@ -522,7 +524,7 @@ export const BingoBoard = () => {
                     disabled={isPlaying}
                     className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-100 disabled:opacity-50"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload />
                     Load File
                   </button>
                 </div>
