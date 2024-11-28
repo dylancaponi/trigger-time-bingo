@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { getBoardIdFromUrl, updateUrlWithBoardId } from '@/lib/utils'
 
-function debounce<T extends (...args: any[]) => any>(
+function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
